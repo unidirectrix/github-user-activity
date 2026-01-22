@@ -25,4 +25,4 @@ npm start kamranahmedse
 ```
 
 #### Want to try the project yourself?
-Visit this [link](https://roadmap.sh/projects/github-user-activity)
+Visit this link: https://roadmap.sh/projects/github-user-activity
