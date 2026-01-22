@@ -17,7 +17,6 @@ async function getGithubUser(username) {
 
         return await response.json();
     } catch (error) {
-        console.error('Fetch GET  error:', error);
     }
 }
 
@@ -35,38 +34,52 @@ const expectedEvents = [
 ];
 
 let repos = [];
-let issueRepo;
+let userRepo;
 let issueAction;
+let forkAction;
+let createAction;
+let deleteAction;
 
 if (body.length !== 0){
     for (let events of body) {
         let recordedEvent = events["type"];
         switch (recordedEvent) {
             case 'CreateEvent':
+                createAction = events["payload"]["ref_type"];
+                userRepo = events["repo"]["name"];
+                outputString += `- Created a new ${createAction} in ${userRepo}\n`;
                 break;
             case 'DeleteEvent':
+                deleteAction = events["payload"]["ref_type"];
+                userRepo = events["repo"]["name"];
+                outputString += `- Deleted ${deleteAction} in ${userRepo}\n`;
                 break;
             case 'ForkEvent':
+                forkAction = events["payload"]["action"]; 
+                userRepo = events["repo"]["name"];
+                outputString += `- ${forkAction.charAt(0).toUpperCase() + forkAction.slice(1)} ${userRepo}\n`;
                 break;
             case 'IssuesEvent':
                 issueAction = events["payload"]["action"];
-                issueRepo = events["repo"]["name"];
+                userRepo = events["repo"]["name"];
                 if (issueAction === 'opened'){
-                    outputString += `- Opened a new issue in ${issueRepo}\n`;
+                    outputString += `- Opened a new issue in ${userRepo}\n`;
                 }else{
-                    outputString += `- ${issueAction.charAt(0).toUpperCase() + issueAction.slice(1)} an issue in ${issueRepo}\n`;
+                    outputString += `- ${issueAction.charAt(0).toUpperCase() + issueAction.slice(1)} an issue in ${userRepo}\n`;
                 }
                 break;
             case 'PushEvent':
-                issueRepo = events["repo"]["name"];
-                const index = repos.findIndex(rep => rep.repo === issueRepo);
+                userRepo = events["repo"]["name"];
+                const index = repos.findIndex(rep => rep.repo === userRepo);
                 if (index == -1){
-                    repos.push({"repo": issueRepo, "count": 1});
+                    repos.push({"repo": userRepo, "count": 1});
                 }else{
                     repos[index]["count"] += 1;
                 }
                 break;
             case 'WatchEvent':
+                userRepo = events["repo"]["name"];
+                outputString += `- Starred ${userRepo} \n`;
                 break;
         }
     }
